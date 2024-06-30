@@ -25,7 +25,8 @@ function createWindow() {
         }
     });
 
-    mainWindow.loadURL(`file://${path.join(__dirname, 'src/index.html')}`);
+    // mainWindow.loadURL(`file://${path.join(__dirname, 'dist/index.html')}`);
+    mainWindow.loadURL('http://localhost:5173');
 
     // Open the DevTools.
     mainWindow.webContents.openDevTools();
