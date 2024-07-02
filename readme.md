@@ -7,7 +7,7 @@ nvm use 18.17.0
 
 ```
 
-### 项目结构
+### 1 项目结构
 ```
 ├── forge.config.js ----------------- 打包和发布 Electron 应用程序的工具
 ├── index.html ---------------------- react项目的页面
@@ -52,3 +52,5 @@ nvm use 18.17.0
 └── webpack.config.js
 
 ```
+
+### 2 electron语法
