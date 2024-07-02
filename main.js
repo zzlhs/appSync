@@ -8,6 +8,7 @@
  */
 
 const { app, BrowserWindow, ipcMain } = require('electron');
+const { exec } = require('child_process');
 const path = require('path');
 
 function createWindow() {
@@ -20,17 +21,41 @@ function createWindow() {
              * path.join API 将多个路径联结在一起，创建一个跨平台的路径字符串。
              */
             preload: path.join(__dirname, 'preload.js'),
-            // nodeIntegration: true, // 启用 Node.js 集成
-            // contextIsolation: false
+            contextIsolation: true, // 启用上下文隔离
+            enableRemoteModule: false, // 禁用 remote 模块
+            nodeIntegration: false, // 禁用 Node.js 集成
         }
     });
 
-    // mainWindow.loadURL(`file://${path.join(__dirname, 'src/index.html')}`);
-    mainWindow.loadURL("http://localhost:5173/")
+    if (process.env.NODE_ENV === 'development') {
+        mainWindow.loadURL("http://localhost:5173/")
+    } else {
+        mainWindow.loadFile(path.join(__dirname, 'dist/index.html'));
+    }
 
+    // 使用 mdfind 命令获取已安装的应用
+    exec('mdfind "kMDItemContentType == \'com.apple.application-bundle\'"', (error, stdout, stderr) => {
+            if (error) {
+                console.error(`exec error: ${error}`);
+                return;
+            }else{
+                console.log("installed-apps = ", stdout);
+            }
+
+            const appArray = stdout.split('\n').filter(Boolean);
+            // 将结果传递给渲染进程
+            console.log(appArray);
+            mainWindow.webContents.on('did-finish-load', () => {
+                console.log("send appArray to sub finished...", appArray);
+                mainWindow.webContents.send('installed-apps', appArray);
+            });
+        }
+    );
     // Open the DevTools.
     mainWindow.webContents.openDevTools();
+    console.log("start -----------------------------");
 }
+
 
 app.whenReady().then(() => {
     ipcMain.handle('ping', () => 'pong')

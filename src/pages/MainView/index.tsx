@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from "react";
 import { Avatar, List } from 'antd';
 
 const data = [
@@ -17,22 +17,38 @@ const data = [
 ];
 
 
-
 const MainView: React.FC= () => {
-  return(
-    <List
-        itemLayout="horizontal"
-        dataSource={data}
-        renderItem={(item, index) => (
-            <List.Item>
-              <List.Item.Meta
-                  avatar={<Avatar src={`https://api.dicebear.com/7.x/miniavs/svg?seed=${index}`} />}
-                  title={<a href="https://ant.design">{item.title}</a>}
-                  description="Ant Design, a design language for background applications, is refined by Ant UED Team"
-              />
-            </List.Item>
-        )}
-    />)
+    const [apps, setApps] = useState([]);
+
+    useEffect(() => {
+        console.log("detail111111 useEffect if out", apps);
+
+        if (window.versions) {
+            window.versions.onInstalledApps('installed-apps', (data1: string[]) => {
+                console.log("detail111111 useEffect if in", data1);
+                setApps(data1);
+            });
+        }
+    }, []);
+
+    console.log("detail111111", data);
+    console.log("detail111112", apps);
+
+    return(
+        <List
+            itemLayout="horizontal"
+            dataSource={data}
+            renderItem={(item, index) => (
+                <List.Item>
+                  <List.Item.Meta
+                      avatar={<Avatar src={`https://api.dicebear.com/7.x/miniavs/svg?seed=${index}`} />}
+                      title={<a href="https://ant.design">{item.title}</a>}
+                      description="Ant Design, a design language for background applications, is refined by Ant UED Team"
+                  />
+                </List.Item>
+            )}
+        />
+    )
 }
 
 

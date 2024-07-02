@@ -24,12 +24,13 @@ export default function Login() {
           className="mt-8"
           form={form}
           onFinish={() => {
-            const { username, code } = form.getFieldsValue();
-            if (username === "123@qq.com" && code === "123123") {
-              navigate("/home/index");
-            } else {
-              message.error("验证错误");
-            }
+            // const { username, code } = form.getFieldsValue();
+            navigate("/home/index");
+            // if (username === "123@qq.com" && code === "123123") {
+            //   navigate("/home/index");
+            // } else {
+            //   message.error("验证错误");
+            // }
           }}
         >
           <Form.Item

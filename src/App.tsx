@@ -1,10 +1,29 @@
+import React, { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "@/pages/Login";
 import Home from "@/pages/Home";
 import MyView from "./pages/Paper/MyView";
 // import Views from "./pages/Paper/Views";
 import MainView from "./pages/MainView";
-export default function App() {
+
+
+
+const App: React.FC = () => {
+
+  const [apps, setApps] = useState<string[]>([]);
+  console.log("detail111111 useEffect if out", apps);
+
+  useEffect(() => {
+    if (window.versions) {
+      window.versions.onInstalledApps('installed-apps', (data: string[]) => {
+        console.log("detail111111 useEffect if out2 ", data);
+        setApps(data);
+      });
+      console.log("detail111111 useEffect if in", apps);
+
+    }
+  }, []);
+
   return (
     <BrowserRouter>
       <Routes>
@@ -20,3 +39,5 @@ export default function App() {
     </BrowserRouter>
   );
 }
+
+export default App;

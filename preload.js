@@ -8,6 +8,22 @@ contextBridge.exposeInMainWorld('versions', {
     chrome: () => process.versions.chrome,
     electron: () => process.versions.electron,
     // 除函数之外，我们也可以暴露变量
-    ping: () => ipcRenderer.invoke('ping')
-
+    ping: () => ipcRenderer.invoke('ping'),
+    onInstalledApps: (channel, func) => {
+        const validChannels = ['installed-apps'];
+        if (validChannels.includes(channel)) {
+            ipcRenderer.on(channel, (event, ...args) => func(...args));
+        }
+    }
 })
+
+// contextBridge.exposeInMainWorld('electron', {
+//     receive: (channel, func) => {
+//         const validChannels = ['installed-apps'];
+//
+//         console.log("preload 111111111", validChannels);
+//         if (validChannels.includes(channel)) {
+//             ipcRenderer.on(channel, (event, ...args) => func(...args));
+//         }
+//     }
+// });
