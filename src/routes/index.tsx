@@ -1,7 +1,6 @@
 import {
   HomeOutlined,
   OrderedListOutlined,
-  // UserAddOutlined,
   UsergroupAddOutlined,
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";

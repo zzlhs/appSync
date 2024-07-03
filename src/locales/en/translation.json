@@ -1,0 +1,18 @@
+{
+  "welcome": "Welcome to React and react-i18next",
+  "login": {
+    "title":"Application Sync",
+    "welcome": "WELCOME YOU",
+    "inputPwd": "请输入验证码",
+    "inputAct": "请输入账号",
+    "": "最长为6位",
+    "": "输入6位验证码",
+    "btn": "login"
+  },
+  "my": {
+    "mail": "EMAIL",
+    "delete": "Delete Account"
+
+  }
+
+}

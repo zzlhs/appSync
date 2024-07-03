@@ -3,6 +3,8 @@ import { Card, Layout, Menu, theme } from "antd";
 import logo from "@public/icon.ico";
 import { Outlet, useNavigate } from "react-router-dom";
 import { routes } from "@/routes";
+import Welcome from '@/components/Welcome';
+
 
 const { Header, Content, Sider } = Layout;
 
@@ -26,24 +28,27 @@ const App: React.FC = () => {
   return (
     <Layout style={{ minHeight: "100vh" }}>
       <Sider collapsible={false}>
-        <div
-          className="demo-logo-vertical flex flex-row my-4 box-border justify-center w-4/5 mx-auto"
-          onClick={() => navigate("/home")}
-        >
-          <img src={logo} className="w-7 h-7" />
-          {isShowTitle && (
-            <p
-              className="h-7 text-center pl-4"
-              style={{ lineHeight: "28px", color: "white" }}
-            >
-              同步应用
-            </p>
-          )}
-        </div>
-        <Menu
-          theme="dark"
-          mode="inline"
-          defaultSelectedKeys={getSelectKeys()}
+          <div
+              className="demo-logo-vertical flex flex-row my-4 box-border justify-center w-4/5 mx-auto"
+              onClick={() => navigate("/home")}
+          >
+              <img src={logo} className="w-7 h-7"/>
+              {isShowTitle && (
+                  <p
+                      className="h-7 text-center pl-4"
+                      style={{lineHeight: "28px", color: "white"}}
+                  >
+                      同步应用
+                  </p>
+              )}
+              <div className="App">
+                  <Welcome/>
+              </div>
+          </div>
+          <Menu
+              theme="dark"
+              mode="inline"
+              defaultSelectedKeys={getSelectKeys()}
           defaultOpenKeys={getSelectKeys()}
           items={routes}
           onClick={({ keyPath, domEvent }: any) => {
@@ -61,10 +66,11 @@ const App: React.FC = () => {
         />
       </Sider>
       <Layout>
-        <Header style={{ padding: 0, background: colorBgContainer }}>
-          <h2 className="pl-6">{title}</h2>
-        </Header>
-        <Content style={{ margin: "16px" }}>
+          <Header style={{padding: 0, background: colorBgContainer}}>
+              <h2 className="pl-6">{title}</h2>
+
+          </Header>
+          <Content style={{margin: "16px"}}>
           <Card style={{ height: "100%" }}>
             <Outlet />
           </Card>

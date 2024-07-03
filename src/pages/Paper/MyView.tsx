@@ -1,4 +1,6 @@
 import { Modal } from 'antd';
+import { useTranslation } from 'react-i18next';
+
 
 const warning = () => {
     Modal.warning({
@@ -8,10 +10,14 @@ const warning = () => {
 };
 
 const MyView: React.FC = () => {
+    const { t} = useTranslation();
+    console.log('myView rendered'); // 确认组件重新渲染
+
+
     return (
         <div>
-            <h3>邮箱：</h3>1528338926@qq.com
-            <div onClick={warning}><h3>删除账号</h3></div>
+            <h3>{t('my.mail')}:</h3>1528338926@qq.com
+            <div onClick={warning}><h3>{t('my.delete')}</h3></div>
         </div>
     )
 }

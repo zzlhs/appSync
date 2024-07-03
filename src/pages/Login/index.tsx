@@ -3,22 +3,26 @@ import "./index.less";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { useForm } from "antd/es/form/Form";
 import { useNavigate } from "react-router-dom";
+import useI18n from '@/hooks/useI18n';
+
 
 export default function Login() {
   const [form] = useForm();
   const navigate = useNavigate();
+  const { t } = useI18n();
+
   return (
     <div className="box relative" style={{ width: "100vw", height: "100vh" }}>
       <div
         className="absolute top-1/2 left-1/2 h-96 w-96 "
         style={{ transform: "translate(-50%, -50%)" }}
       >
-        <h1 className="text-center">应用同步</h1>
+        <h1 className="text-center">{t('login.title')}</h1>
         <h3
           className="text-center font-normal text-base mt-4"
           style={{ color: "gray" }}
         >
-          欢迎使用
+          {t('login.welcome')}
         </h3>
         <Form
           className="mt-8"
@@ -60,7 +64,7 @@ export default function Login() {
           </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit" className="w-full">
-              登录
+              {t('login.btn')}
             </Button>
           </Form.Item>
         </Form>
