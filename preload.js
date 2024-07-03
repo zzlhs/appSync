@@ -16,14 +16,3 @@ contextBridge.exposeInMainWorld('versions', {
         }
     }
 })
-
-// contextBridge.exposeInMainWorld('electron', {
-//     receive: (channel, func) => {
-//         const validChannels = ['installed-apps'];
-//
-//         console.log("preload 111111111", validChannels);
-//         if (validChannels.includes(channel)) {
-//             ipcRenderer.on(channel, (event, ...args) => func(...args));
-//         }
-//     }
-// });

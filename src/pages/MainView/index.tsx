@@ -1,54 +1,40 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Avatar, List } from 'antd';
-
-const data = [
-  {
-    title: 'Ant Design Title 1',
-  },
-  {
-    title: 'Ant Design Title 2',
-  },
-  {
-    title: 'Ant Design Title 3',
-  },
-  {
-    title: 'Ant Design Title 4',
-  },
-];
+import Application from "@/types/Application.ts";
 
 
-const MainView: React.FC= () => {
-    const [apps, setApps] = useState([]);
+interface MainViewProps {
+    apps: Array<Application>;
+}
 
-    useEffect(() => {
-        console.log("detail111111 useEffect if out", apps);
-
-        if (window.versions) {
-            window.versions.onInstalledApps('installed-apps', (data1: string[]) => {
-                console.log("detail111111 useEffect if in", data1);
-                setApps(data1);
-            });
-        }
-    }, []);
-
-    console.log("detail111111", data);
-    console.log("detail111112", apps);
+/**
+ * 1 React 组件的 props 类型定义应使用接口，而不是直接定义为数组。
+ * 2 组件的 props 解构在函数参数中进行。
+ * 3 修正类型定义和导入路径。
+ *
+ * @param apps
+ * @constructor
+ *
+ */
+const MainView: React.FC<MainViewProps> = ({ apps}) => {
+    console.log("mainView 11111", apps);
 
     return(
         <List
             itemLayout="horizontal"
-            dataSource={data}
+            dataSource={apps}
             renderItem={(item, index) => (
-                <List.Item>
-                  <List.Item.Meta
-                      avatar={<Avatar src={`https://api.dicebear.com/7.x/miniavs/svg?seed=${index}`} />}
-                      title={<a href="https://ant.design">{item.title}</a>}
-                      description="Ant Design, a design language for background applications, is refined by Ant UED Team"
-                  />
+                <List.Item actions={[<a key="list-loadmore-edit">edit</a>, <a key="list-loadmore-more">more</a>]}>
+                    <List.Item.Meta
+                        avatar={<Avatar src={`https://api.dicebear.com/7.x/miniavs/svg?seed=${index}`} />}
+                        title={<a href="https://ant.design">{item.name}</a>}
+                        description="Ant Design, a design language for background applications, is refined by Ant UED Team"
+                    />
                 </List.Item>
             )}
         />
     )
+
 }
 
 

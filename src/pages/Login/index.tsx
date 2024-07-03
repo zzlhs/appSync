@@ -13,12 +13,12 @@ export default function Login() {
         className="absolute top-1/2 left-1/2 h-96 w-96 "
         style={{ transform: "translate(-50%, -50%)" }}
       >
-        <h1 className="text-center">个人博客</h1>
+        <h1 className="text-center">应用同步</h1>
         <h3
           className="text-center font-normal text-base mt-4"
           style={{ color: "gray" }}
         >
-          后台管理系统
+          欢迎使用
         </h3>
         <Form
           className="mt-8"

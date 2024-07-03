@@ -21,7 +21,7 @@ nvm use 18.17.0
 ├── readme.md
 ├── renderer.js --------------------- Electron 与主线程交换信息的文件
 ├── src ----------------------------- react项目的目录 
-│   ├── App.tsx
+│   ├── Application.tsx
 │   ├── apis
 │   │   └── index.ts
 │   ├── assets
