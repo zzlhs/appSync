@@ -1,5 +1,6 @@
 import React from "react";
-import { Avatar, List } from 'antd';
+import { useTranslation } from 'react-i18next';
+import { Avatar, List, Button } from 'antd';
 import Application from "@/types/Application.ts";
 
 
@@ -17,18 +18,26 @@ interface MainViewProps {
  *
  */
 const MainView: React.FC<MainViewProps> = ({ apps}) => {
+    const { t} = useTranslation();
     console.log("mainView 11111", apps);
+
+    function handleInstall(): void {
+        console.log("安装文件")
+    }
 
     return(
         <List
             itemLayout="horizontal"
             dataSource={apps}
             renderItem={(item, index) => (
-                <List.Item actions={[<a key="list-loadmore-edit">edit</a>, <a key="list-loadmore-more">more</a>]}>
+                <List.Item actions={[
+                    item.localIsInstalled ?
+                        <Button type="primary" shape="round" disabled>  {t('main.installed')} </Button> :
+                        <Button type="primary" shape="round" onClick={handleInstall}>{t('main.uninstall')}</Button>]}>
                     <List.Item.Meta
-                        avatar={<Avatar src={`https://api.dicebear.com/7.x/miniavs/svg?seed=${index}`} />}
+                        avatar={<Avatar src={`https://api.dicebear.com/7.x/miniavs/svg?seed=${index}`}/>}
                         title={<a href="https://ant.design">{item.name}</a>}
-                        description="Ant Design, a design language for background applications, is refined by Ant UED Team"
+                        description={item.desc}
                     />
                 </List.Item>
             )}

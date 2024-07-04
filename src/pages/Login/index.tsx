@@ -1,4 +1,4 @@
-import { Button, Form, Input, message } from "antd";
+import { Button, Form, Input } from "antd";
 import "./index.less";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { useForm } from "antd/es/form/Form";

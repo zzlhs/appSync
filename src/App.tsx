@@ -8,7 +8,7 @@ import Application from "@/types/Application.ts";
 
 const app1: Application  = {
   name: "阴阳师",
-  desc: "1",
+  desc: "阴阳师网易事实上非大煞风景咖喱鸡饭看乐山大佛弹尽粮绝快乐就快乐",
   avatar: "111",
   index: 1,
   localIsInstalled: true, // 本地是否已经安装
@@ -16,7 +16,7 @@ const app1: Application  = {
 }
 const app2: Application  = {
   name: "梦幻西游",
-  desc: "2",
+  desc: "梦幻西游看见肯德基咖啡几点上课就犯困酒店房间打开手机疯狂的技术开发就看见啊微风i件廉价品",
   avatar: "222",
   index: 2,
   localIsInstalled: false, // 本地是否已经安装
