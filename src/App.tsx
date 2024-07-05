@@ -26,20 +26,35 @@ const appsD: Application[] = [app1, app2]
 
 const App: React.FC = () => {
 
-  const [apps, setApps] = useState<string[]>([]);
-  console.log("detail111111 useEffect out", apps);
+  const [apps, setApps] = useState<Application[]>([]);
+  console.log("detail111111 useEffect out", apps.length);
 
   useEffect(() => {
-    console.log("detail111111 useEffect if out 1 ", apps);
+    console.log("detail111111 useEffect if out 1 ", apps.length);
 
     if (window.versions) {
       window.versions.onInstalledApps('installed-apps', (data: string[]) => {
+        console.log("detail111111 useEffect if in ", data.length);
         console.log("detail111111 useEffect if in ", data);
-        setApps(data);
+
+        let appArray: Application[] = [];
+        data.map(item => {
+          let name: string = item.substring(item.lastIndexOf('/') + 1);
+          let appTemp: Application = {
+            name: name,
+            localIsInstalled: true,
+          }
+          appArray.push(appTemp);
+        });
+        setApps(appArray);
       });
     }
-    console.log("detail111111 useEffect if out 2 ", apps);
-
+    console.log("detail111111 useEffect if out 2 ", apps.length);
+    // 返回一个 清理（cleanup） 函数
+    return  () => {
+      console.log("clenaup fun ...")
+      setApps([]);
+    }
   }, []);
 
 
@@ -49,7 +64,7 @@ const App: React.FC = () => {
         <Route index element={<Login />} />
         <Route path="home" element={<Home />}>
           <Route index path="index" element={<h1>欢迎使用应用同步</h1>} />
-          <Route index path="main" element={<MainView apps ={ appsD } />} />
+          <Route index path="main" element={<MainView apps ={ apps } />} />
           <Route index path="my" element={<MyView />} />
         </Route>
 
