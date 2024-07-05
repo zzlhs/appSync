@@ -25,6 +25,8 @@ const MainView: React.FC<MainViewProps> = ({ apps}) => {
         console.log("安装文件")
     }
 
+
+
     return(
         <List
             itemLayout="horizontal"
@@ -33,7 +35,8 @@ const MainView: React.FC<MainViewProps> = ({ apps}) => {
                 <List.Item actions={[
                     item.localIsInstalled ?
                         <Button type="primary" shape="round" disabled>  {t('main.installed')} </Button> :
-                        <Button type="primary" shape="round" onClick={handleInstall}>{t('main.uninstall')}</Button>]}>
+                        <Button type="primary" shape="round" onClick={handleInstall}>{t('main.uninstall')}</Button>
+                        ]}>
                     <List.Item.Meta
                         avatar={<Avatar src={`https://api.dicebear.com/7.x/miniavs/svg?seed=${index}`}/>}
                         title={<a href="https://ant.design">{item.name}</a>}
