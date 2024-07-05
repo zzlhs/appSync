@@ -7,7 +7,7 @@
  * BrowserWindow，它负责创建和管理应用窗口。
  */
 
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, shell } = require('electron');
 const { exec } = require('child_process');
 const path = require('path');
 
@@ -51,6 +51,11 @@ function createWindow() {
             });
         }
     );
+    const url = 'macappstore://';
+    // ipcMain.on('open-mac-store', (event, url) => {
+    //     shell.openExternal(url);
+    // });
+
     // Open the DevTools.
     mainWindow.webContents.openDevTools();
     console.log("start -----------------------------");
