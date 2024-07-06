@@ -19,14 +19,16 @@ const app2: Application  = {
   desc: "梦幻西游看见肯德基咖啡几点上课就犯困酒店房间打开手机疯狂的技术开发就看见啊微风i件廉价品",
   avatar: "222",
   index: 2,
+  webUrl: 'hhwwww',
   localIsInstalled: false, // 本地是否已经安装
   cloudIsInstalled: true, //
 }
 const appsD: Application[] = [app1, app2]
 
 const App: React.FC = () => {
-
   const [apps, setApps] = useState<Application[]>([]);
+  const [willInstallAppUrl, setwillInstallAppUrl] = useState<string>('');
+
   console.log("detail111111 useEffect out", apps.length);
 
   useEffect(() => {
@@ -42,6 +44,7 @@ const App: React.FC = () => {
           let name: string = item.substring(item.lastIndexOf('/') + 1);
           let appTemp: Application = {
             name: name,
+            webUrl: "http://jkljlk",
             localIsInstalled: true,
           }
           appArray.push(appTemp);
@@ -57,6 +60,10 @@ const App: React.FC = () => {
     }
   }, []);
 
+  function handleInstall(url: string): void {
+    setwillInstallAppUrl(url);
+    console.log("app  install ", url);
+  }
 
   return (
     <BrowserRouter>
@@ -64,7 +71,7 @@ const App: React.FC = () => {
         <Route index element={<Login />} />
         <Route path="home" element={<Home />}>
           <Route index path="index" element={<h1>欢迎使用应用同步</h1>} />
-          <Route index path="main" element={<MainView apps ={ apps } />} />
+          <Route index path="main" element={<MainView apps={appsD} onInstallApp = {handleInstall}  />} />
           <Route index path="my" element={<MyView />} />
         </Route>
 

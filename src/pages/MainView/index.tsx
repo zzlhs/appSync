@@ -6,6 +6,7 @@ import Application from "@/types/Application.ts";
 
 interface MainViewProps {
     apps: Array<Application>;
+    onInstallApp: (data: string) => void;
 }
 
 /**
@@ -17,12 +18,13 @@ interface MainViewProps {
  * @constructor
  *
  */
-const MainView: React.FC<MainViewProps> = ({ apps}) => {
+const MainView: React.FC<MainViewProps> = ({ apps, onInstallApp}) => {
     const { t} = useTranslation();
     console.log("mainView 11111", apps);
 
-    function handleInstall(): void {
+    function handleInstall(installAppUrl: string): void {
         console.log("安装文件")
+        onInstallApp(installAppUrl);
     }
 
 
@@ -35,7 +37,7 @@ const MainView: React.FC<MainViewProps> = ({ apps}) => {
                 <List.Item actions={[
                     item.localIsInstalled ?
                         <Button type="primary" shape="round" disabled>  {t('main.installed')} </Button> :
-                        <Button type="primary" shape="round" onClick={handleInstall}>{t('main.uninstall')}</Button>
+                        <Button type="primary" shape="round" onClick={() => handleInstall(item.webUrl)}>{t('main.uninstall')}</Button>
                         ]}>
                     <List.Item.Meta
                         avatar={<Avatar src={`https://api.dicebear.com/7.x/miniavs/svg?seed=${index}`}/>}
