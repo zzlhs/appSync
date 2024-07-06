@@ -14,5 +14,7 @@ contextBridge.exposeInMainWorld('syncapps', {
         if (validChannels.includes(channel)) {
             ipcRenderer.on(channel, (event, ...args) => func(...args));
         }
-    }
+    },
+    openMacAppStore: (appId) => ipcRenderer.send('open-mac-app-store', appId),
+
 })

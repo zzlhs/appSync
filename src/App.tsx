@@ -19,7 +19,7 @@ const app2: Application  = {
   desc: "梦幻西游看见肯德基咖啡几点上课就犯困酒店房间打开手机疯狂的技术开发就看见啊微风i件廉价品",
   avatar: "222",
   index: 2,
-  webUrl: 'hhwwww',
+  webUrl: '6451498949',
   localIsInstalled: false, // 本地是否已经安装
   cloudIsInstalled: true, //
 }
@@ -60,10 +60,12 @@ const App: React.FC = () => {
     }
   }, []);
 
-  function handleInstall(url: string): void {
+  const handleInstall = (url: string) => {
     setwillInstallAppUrl(url);
     console.log("app  install ", url);
+    window.syncapps.openMacAppStore(url);
   }
+
 
   return (
     <BrowserRouter>

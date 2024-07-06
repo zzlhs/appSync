@@ -11,6 +11,8 @@ const { app, BrowserWindow, ipcMain, shell } = require('electron');
 const { exec } = require('child_process');
 const path = require('path');
 
+const filePathSystem = "System";
+
 function createWindow() {
     const mainWindow = new BrowserWindow({
         width: 800,
@@ -27,6 +29,8 @@ function createWindow() {
         }
     });
 
+
+
     if (process.env.NODE_ENV === 'development') {
         mainWindow.loadURL("http://localhost:5173/")
     } else {
@@ -34,7 +38,8 @@ function createWindow() {
     }
 
     // 使用 mdfind 命令获取已安装的应用
-    exec('mdfind "kMDItemContentType == \'com.apple.application-bundle\'"', (error, stdout, stderr) => {
+    // mdfind "kMDItemContentType == 'com.apple.application-bundle'" | grep "~/Library/Application Support"
+    exec('mdfind "kMDItemContentType == \'com.apple.application-bundle\'" | grep "/Applications" ', (error, stdout, stderr) => {
             if (error) {
                 console.error(`exec error: ${error}`);
                 return;
@@ -42,22 +47,16 @@ function createWindow() {
                 console.log("installed-apps = ", stdout);
             }
 
-            const appArray = stdout.split('\n').filter(Boolean);
-            // 将结果传递给渲染进程
-            console.log(appArray);
-            mainWindow.webContents.on('did-finish-load', () => {
-                console.log("send appArray to sub finished...", appArray);
-                mainWindow.webContents.send('installed-apps', appArray);
-            });
-        }
+            const appArray = stdout.split('\n').filter(item => !item.includes(filePathSystem));
+                // 将结果传递给渲染进程
+                console.log(appArray);
+                mainWindow.webContents.on('did-finish-load', () => {
+                    console.log("send appArray to sub finished...", appArray);
+                    mainWindow.webContents.send('installed-apps', appArray);
+                });
+            }
     );
-    // 打开网页中的 mac store
-    // const url = 'https://apps.apple.com/us/app/app-name/id6451498949';
-    // 打开系统的mac store
-    const url = 'macappstore://itunes.apple.com/app/id6451498949';
-    // ipcMain.on('open-mac-store', (event, url) => {
-        shell.openExternal(url);
-    // });
+
 
     // Open the DevTools.
     mainWindow.webContents.openDevTools();
@@ -68,6 +67,15 @@ function createWindow() {
 app.whenReady().then(() => {
     ipcMain.handle('ping', () => 'pong')
     createWindow()
+});
+
+
+// 打开网页中的 mac store
+// const url = 'https://apps.apple.com/us/app/app-name/id6451498949';
+// 打开系统的mac store
+ipcMain.on('open-mac-app-store', (event, appId) => {
+    const url = `macappstore://itunes.apple.com/app/id${appId}`;
+    shell.openExternal(url);
 });
 
 /**
