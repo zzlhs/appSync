@@ -34,8 +34,8 @@ const App: React.FC = () => {
   useEffect(() => {
     console.log("detail111111 useEffect if out 1 ", apps.length);
 
-    if (window.versions) {
-      window.versions.onInstalledApps('installed-apps', (data: string[]) => {
+    if (window.syncapps) {
+      window.syncapps.onInstalledApps('installed-apps', (data: string[]) => {
         console.log("detail111111 useEffect if in ", data.length);
         console.log("detail111111 useEffect if in ", data);
 

@@ -3,7 +3,7 @@ const { contextBridge, ipcRenderer } = require('electron')
 /**
  * 通过 contextBridge 接口定义 全局对象 versions 暴露给渲染器
  */
-contextBridge.exposeInMainWorld('versions', {
+contextBridge.exposeInMainWorld('syncapps', {
     node: () => process.versions.node,
     chrome: () => process.versions.chrome,
     electron: () => process.versions.electron,

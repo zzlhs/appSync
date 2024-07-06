@@ -22,7 +22,7 @@ const MainView: React.FC<MainViewProps> = ({ apps, onInstallApp}) => {
     const { t} = useTranslation();
     console.log("mainView 11111", apps);
 
-    function handleInstall(installAppUrl: string): void {
+    const handleInstall = (installAppUrl: string) => {
         console.log("安装文件")
         onInstallApp(installAppUrl);
     }

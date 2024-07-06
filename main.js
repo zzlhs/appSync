@@ -51,9 +51,12 @@ function createWindow() {
             });
         }
     );
-    const url = 'macappstore://';
+    // 打开网页中的 mac store
+    // const url = 'https://apps.apple.com/us/app/app-name/id6451498949';
+    // 打开系统的mac store
+    const url = 'macappstore://itunes.apple.com/app/id6451498949';
     // ipcMain.on('open-mac-store', (event, url) => {
-    //     shell.openExternal(url);
+        shell.openExternal(url);
     // });
 
     // Open the DevTools.
