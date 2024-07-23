@@ -10,8 +10,18 @@
 const { app, BrowserWindow, ipcMain, shell } = require('electron');
 const { exec } = require('child_process');
 const path = require('path');
+const fs = require('fs');
 
 const filePathSystem = "System";
+
+const appName = 'Safari';
+const script = `
+  tell application "Finder"
+    set appPath to (POSIX path of (path to application "${appName}"))
+    return appPath
+  end tell
+`;
+
 
 function createWindow() {
     const mainWindow = new BrowserWindow({
@@ -28,7 +38,6 @@ function createWindow() {
             nodeIntegration: false, // 禁用 Node.js 集成
         }
     });
-
 
 
     if (process.env.NODE_ENV === 'development') {
@@ -57,6 +66,15 @@ function createWindow() {
             }
     );
 
+    // exec(`osascript -e '${script}'`, (error, stdout, stderr) => {
+    //     if (error) {
+    //         console.error(`Error executing script: ${error}`);
+    //         return;
+    //     }
+    //     const appPath = stdout.trim();
+    //     console.log(`Application Path: ${appPath}`);
+    //     checkIconPath(appPath);
+    // });
 
     // Open the DevTools.
     mainWindow.webContents.openDevTools();
@@ -99,3 +117,41 @@ app.on('activate', () => {
         createWindow();
     }
 });
+
+
+function checkIconPath(appPath) {
+    // 常见的图标路径
+    const possibleIconPaths = [
+        path.join(appPath, 'Contents/Resources/AppIcon.icns'),
+        path.join(appPath, 'Contents/Resources/app.icns'),
+        path.join(appPath, 'Contents/Resources/icon.icns'),
+        path.join(appPath, 'Contents/Resources/', appName + '.icns')
+    ];
+
+    for (let iconPath of possibleIconPaths) {
+        fs.access(iconPath, fs.constants.F_OK, (err) => {
+            if (!err) {
+                console.log(`Icon Path: ${iconPath}`);
+                readIconFile(iconPath);
+                return;
+            }
+        });
+    }
+}
+
+function readIconFile(iconPath) {
+    fs.readFile(iconPath, (err, data) => {
+        if (err) {
+            console.error(`Error reading icon file: ${err}`);
+            return;
+        }
+
+        // 转换为 Base64 编码
+        const base64Icon = data.toString('base64');
+        const dataUri = `data:image/icns;base64,${base64Icon}`;
+        console.log(`Data URI: ${dataUri}`);
+
+        // 将图标路径传递给前端（假设使用 Electron 的主进程与渲染进程通信）
+        // mainWindow.webContents.send('icon-data', dataUri);
+    });
+}
