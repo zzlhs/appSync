@@ -12,7 +12,9 @@
   },
   "my": {
     "mail": "邮箱",
-    "delete": "删除账号"
+    "delete": "删除账号",
+    "plaform":"系统",
+    "exportAll": "导出已安装应用全部信息"
   },
   "main": {
     "installed": "已安装",

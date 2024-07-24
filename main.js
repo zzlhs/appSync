@@ -7,10 +7,12 @@
  * BrowserWindow，它负责创建和管理应用窗口。
  */
 
-const { app, BrowserWindow, ipcMain, shell } = require('electron');
+const { app, BrowserWindow, ipcMain, shell, dialog } = require('electron');
 const { exec } = require('child_process');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
+const CustomEvent = require('./custom-event');
 
 const filePathSystem = "System";
 
@@ -41,30 +43,29 @@ function createWindow() {
 
 
     if (process.env.NODE_ENV === 'development') {
+        //  第2步：加载网页内容
         mainWindow.loadURL("http://localhost:5173/")
     } else {
         mainWindow.loadFile(path.join(__dirname, 'dist/index.html'));
     }
 
-    // 使用 mdfind 命令获取已安装的应用
-    // mdfind "kMDItemContentType == 'com.apple.application-bundle'" | grep "~/Library/Application Support"
-    exec('mdfind "kMDItemContentType == \'com.apple.application-bundle\'" | grep "/Applications" ', (error, stdout, stderr) => {
-            if (error) {
-                console.error(`exec error: ${error}`);
-                return;
-            }else{
-                console.log("installed-apps = ", stdout);
-            }
+    handleSyncApps(mainWindow);
 
-            const appArray = stdout.split('\n').filter(item => !item.includes(filePathSystem));
-                // 将结果传递给渲染进程
-                console.log(appArray);
-                mainWindow.webContents.on('did-finish-load', () => {
-                    console.log("send appArray to sub finished...", appArray);
-                    mainWindow.webContents.send('installed-apps', appArray);
-                });
+
+    const filePath = path.join(app.getPath('documents'), 'myfile.sync');
+    const data = 'hhhfdhskajfjksda jkdfkldsajfkl ';
+    if (filePath) {
+        console.log('filePath = ',filePath)
+        fs.writeFile(filePath, data, (err) => {
+            if (err) {
+                console.error(err);
+            } else {
+                console.log('export success ...')
             }
-    );
+        });
+    } else {
+        event.sender.send('save-file-response', { success: false, error: 'Save dialog was canceled' });
+    }
 
     // exec(`osascript -e '${script}'`, (error, stdout, stderr) => {
     //     if (error) {
@@ -91,7 +92,8 @@ app.whenReady().then(() => {
 // 打开网页中的 mac store
 // const url = 'https://apps.apple.com/us/app/app-name/id6451498949';
 // 打开系统的mac store
-ipcMain.on('open-mac-app-store', (event, appId) => {
+// main listen on render
+ipcMain.on(CustomEvent.RENDER_TO_MAIN.OPEN_MAC_APP_STORE, (event, appId) => {
     const url = `macappstore://itunes.apple.com/app/id${appId}`;
     shell.openExternal(url);
 });
@@ -103,7 +105,7 @@ ipcMain.on('open-mac-app-store', (event, appId) => {
  *
  *
  */
-app.on('window-all-closed', () => {
+app.on(CustomEvent.ELECTRON_EVENT.WINDOW_ALL_CLOSED, () => {
     if (process.platform !== 'darwin') { // 此方法不适用于 macOS。
         app.quit();
     }
@@ -112,11 +114,51 @@ app.on('window-all-closed', () => {
 /**
  * 与前二者相比，即使没有打开任何窗口，macOS 应用通常也会继续运行。 在没有窗口可用时调用 app 会打开一个新窗口
  */
-app.on('activate', () => {
+app.on(CustomEvent.ELECTRON_EVENT.ACTIVATE, () => {
     if (BrowserWindow.getAllWindows().length === 0) {
         createWindow();
     }
 });
+
+function handleSyncApps(mainWindow) {
+
+    const osInfo = getOSInfo();
+
+    // 使用 mdfind 命令获取已安装的应用
+    // mdfind "kMDItemContentType == 'com.apple.application-bundle'" | grep "~/Library/Application Support"
+    exec('mdfind "kMDItemContentType == \'com.apple.application-bundle\'" | grep "/Applications" ', (error, stdout, stderr) => {
+            if (error) {
+                console.error(`exec error: ${error}`);
+                return;
+            } else {
+                console.log("installed-apps = ", stdout);
+            }
+
+            const appArray = stdout.split('\n').filter(item => !item.includes(filePathSystem));
+            // 将结果传递给渲染进程
+            console.log(appArray);
+            // 第2步：当网页内容加载完成时触发
+            mainWindow.webContents.on(CustomEvent.ELECTRON_EVENT.DID_FINISH_LOAD, () => {
+                console.log("send appArray to sub finished...", appArray);
+                mainWindow.webContents.send(CustomEvent.MAIN_TO_RENDER.INSTALLED_APPS, appArray);
+                // mainWindow.webContents.send('os-info', osInfo);
+            });
+        }
+    );
+}
+
+function getOSInfo() {
+    const osInfo = `
+      OS Type: ${os.type()}
+      OS Platform: ${os.platform()}
+      OS Architecture: ${os.arch()}
+      OS Release: ${os.release()}
+      OS Hostname: ${os.hostname()}
+    `;
+
+    console.log('osInfo = ', osInfo)
+    return osInfo;
+}
 
 
 function checkIconPath(appPath) {

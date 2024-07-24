@@ -76,8 +76,6 @@ const App: React.FC = () => {
           <Route index path="main" element={<MainView apps={appsD} onInstallApp = {handleInstall}  />} />
           <Route index path="my" element={<MyView />} />
         </Route>
-
-
       </Routes>
     </BrowserRouter>
   );

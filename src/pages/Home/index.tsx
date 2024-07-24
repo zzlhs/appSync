@@ -3,7 +3,7 @@ import { Card, Layout, Menu, theme } from "antd";
 import logo from "@public/icon.ico";
 import { Outlet, useNavigate } from "react-router-dom";
 import { routes } from "@/routes";
-import Welcome from '@/components/Welcome';
+// import Welcome from '@/components/Welcome';
 
 
 const { Header, Content, Sider } = Layout;
@@ -42,7 +42,7 @@ const App: React.FC = () => {
                   </p>
               )}
               <div className="App">
-                  <Welcome/>
+                  {/*<Welcome/>*/}
               </div>
           </div>
           <Menu
