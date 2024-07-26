@@ -98,12 +98,14 @@ ipcMain.on(CustomEvent.RENDER_TO_MAIN.OPEN_MAC_APP_STORE, (event, appId) => {
     shell.openExternal(url);
 });
 
+ipcMain.on(CustomEvent.RENDER_TO_MAIN.EXPORT_ALL_APP_MES, (event, apps) => {
+    console.log('array = ', apps.length)
+});
+
 /**
  * 在 Windows 和 Linux 上，我们通常希望在关闭一个应用的所有窗口后让它退出。
  * 要在Electron应用中实现这一点，监听 app 模块的 window-all-closed 事件，
  * 并调用 app.quit() 来退出您的应用程序。
- *
- *
  */
 app.on(CustomEvent.ELECTRON_EVENT.WINDOW_ALL_CLOSED, () => {
     if (process.platform !== 'darwin') { // 此方法不适用于 macOS。
@@ -141,20 +143,19 @@ function handleSyncApps(mainWindow) {
             mainWindow.webContents.on(CustomEvent.ELECTRON_EVENT.DID_FINISH_LOAD, () => {
                 console.log("send appArray to sub finished...", appArray);
                 mainWindow.webContents.send(CustomEvent.MAIN_TO_RENDER.INSTALLED_APPS, appArray);
-                // mainWindow.webContents.send('os-info', osInfo);
+                mainWindow.webContents.send(CustomEvent.MAIN_TO_RENDER.OS_INFO, osInfo);
             });
         }
     );
 }
 
 function getOSInfo() {
-    const osInfo = `
-      OS Type: ${os.type()}
-      OS Platform: ${os.platform()}
-      OS Architecture: ${os.arch()}
-      OS Release: ${os.release()}
-      OS Hostname: ${os.hostname()}
-    `;
+    const osInfo = `${os.type()}`// `OS Type: ${os.type()}`
+      // OS Platform: ${os.platform()}
+      // OS Architecture: ${os.arch()}
+      // OS Release: ${os.release()}
+      // OS Hostname: ${os.hostname()}
+    // `;
 
     console.log('osInfo = ', osInfo)
     return osInfo;

@@ -3,9 +3,12 @@ const { contextBridge, ipcRenderer } = require('electron')
 const CustomEvent = {
     RENDER_TO_MAIN: {
         OPEN_MAC_APP_STORE: 'open-mac-app-store',
+        EXPORT_ALL_APP_MES:'export-all-app-mes',
+
     },
     MAIN_TO_RENDER:{
         INSTALLED_APPS:'installed-apps',
+        OS_INFO: 'os-info',
     },
     ELECTRON_EVENT: {
         WINDOW_ALL_CLOSED: 'window-all-closed',
@@ -17,7 +20,7 @@ const CustomEvent = {
 }
 
 /**
- * 通过 contextBridge 接口定义 全局对象 versions 暴露给渲染器
+ * 通过 contextBridge 接口定义 全局对象 syncapps 暴露给渲染器
  */
 contextBridge.exposeInMainWorld('syncapps', {
     node: () => process.versions.node,
@@ -27,12 +30,14 @@ contextBridge.exposeInMainWorld('syncapps', {
     ping: () => ipcRenderer.invoke('ping'),
     // main to render
     onInstalledApps: (channel, func) => {
-        const validChannels = [CustomEvent.MAIN_TO_RENDER.INSTALLED_APPS];
+        const validChannels =
+            [CustomEvent.MAIN_TO_RENDER.INSTALLED_APPS,
+             CustomEvent.MAIN_TO_RENDER.OS_INFO];
         if (validChannels.includes(channel)) {
             ipcRenderer.on(channel, (event, ...args) => func(...args));
         }
     },
     // render thread trans data to main thread
     openMacAppStore: (appId) => ipcRenderer.send(CustomEvent.RENDER_TO_MAIN.OPEN_MAC_APP_STORE, appId),
-
+    exportAllAppMes: (apps) => ipcRenderer.send(CustomEvent.RENDER_TO_MAIN.EXPORT_ALL_APP_MES, apps),
 })

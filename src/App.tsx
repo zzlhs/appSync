@@ -6,6 +6,23 @@ import MyView from "./pages/Paper/MyView";
 import MainView from "./pages/MainView";
 import Application from "@/types/Application.ts";
 
+const CustomEvent = {
+  RENDER_TO_MAIN: {
+    OPEN_MAC_APP_STORE: 'open-mac-app-store',
+  },
+  MAIN_TO_RENDER:{
+    INSTALLED_APPS:'installed-apps',
+    OS_INFO: 'os-info',
+  },
+  ELECTRON_EVENT: {
+    WINDOW_ALL_CLOSED: 'window-all-closed',
+    ACTIVATE: 'activate',
+    // 网页内容加载完成时触发
+    DID_FINISH_LOAD: 'did-finish-load',
+  }
+
+}
+
 const app1: Application  = {
   name: "阴阳师",
   desc: "阴阳师网易事实上非大煞风景咖喱鸡饭看乐山大佛弹尽粮绝快乐就快乐",
@@ -27,6 +44,7 @@ const appsD: Application[] = [app1, app2]
 
 const App: React.FC = () => {
   const [apps, setApps] = useState<Application[]>([]);
+  const [osInfo, setOsInfo] = useState('');
   const [willInstallAppUrl, setwillInstallAppUrl] = useState<string>('');
 
   console.log("detail111111 useEffect out", apps.length);
@@ -35,7 +53,7 @@ const App: React.FC = () => {
     console.log("detail111111 useEffect if out 1 ", apps.length);
 
     if (window.syncapps) {
-      window.syncapps.onInstalledApps('installed-apps', (data: string[]) => {
+      window.syncapps.onInstalledApps(CustomEvent.MAIN_TO_RENDER.INSTALLED_APPS, (data: string[]) => {
         console.log("detail111111 useEffect if in ", data.length);
         console.log("detail111111 useEffect if in ", data);
 
@@ -50,6 +68,11 @@ const App: React.FC = () => {
           appArray.push(appTemp);
         });
         setApps(appArray);
+      });
+
+      window.syncapps.onInstalledApps(CustomEvent.MAIN_TO_RENDER.OS_INFO, (data: string) => {
+        console.log('osInfo = ', data)
+        setOsInfo(data);
       });
     }
     console.log("detail111111 useEffect if out 2 ", apps.length);
@@ -66,6 +89,9 @@ const App: React.FC = () => {
     window.syncapps.openMacAppStore(url);
   }
 
+  const handleExportAllApp = (apps: Application[]) => {
+    window.syncapps.exportAllAppMes(apps);
+  }
 
   return (
     <BrowserRouter>
@@ -74,7 +100,7 @@ const App: React.FC = () => {
         <Route path="home" element={<Home />}>
           <Route index path="index" element={<h1>欢迎使用应用同步</h1>} />
           <Route index path="main" element={<MainView apps={appsD} onInstallApp = {handleInstall}  />} />
-          <Route index path="my" element={<MyView />} />
+          <Route index path="my" element={<MyView osInfo={osInfo} onExportAllAppMes={handleExportAllApp} />} />
         </Route>
       </Routes>
     </BrowserRouter>
