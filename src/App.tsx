@@ -99,7 +99,7 @@ const App: React.FC = () => {
         <Route index element={<Login />} />
         <Route path="home" element={<Home />}>
           <Route index path="index" element={<h1>欢迎使用应用同步</h1>} />
-          <Route index path="main" element={<MainView apps={appsD} onInstallApp = {handleInstall}  />} />
+          <Route index path="main" element={<MainView apps={apps} onInstallApp = {handleInstall}  />} />
           <Route index path="my" element={<MyView osInfo={osInfo} onExportAllAppMes={handleExportAllApp} />} />
         </Route>
       </Routes>

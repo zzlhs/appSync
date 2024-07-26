@@ -5,6 +5,8 @@
 npm install electron --save-dev
 nvm use 18.17.0
 
+npm run electron-start-dev
+
 ```
 
 ### 1 项目结构

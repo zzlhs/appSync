@@ -19,11 +19,6 @@ interface MyComponentProps {
 const MyView: React.FC<MyComponentProps> = ({ osInfo, onExportAllAppMes}) => {
     const { t} = useTranslation();
 
-    switch (osInfo){
-        case 'Darwin': osInfo = 'MAC';
-        break;
-    }
-
     console.log('myView rendered'); // 确认组件重新渲染
 
     const handleExport = () => {

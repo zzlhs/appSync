@@ -9,6 +9,8 @@
 
 const { app, BrowserWindow, ipcMain, shell, dialog } = require('electron');
 const { exec } = require('child_process');
+const util = require('util');
+const execAsync = util.promisify(exec);
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
@@ -42,6 +44,7 @@ function createWindow() {
     });
 
 
+
     if (process.env.NODE_ENV === 'development') {
         //  第2步：加载网页内容
         mainWindow.loadURL("http://localhost:5173/")
@@ -49,23 +52,23 @@ function createWindow() {
         mainWindow.loadFile(path.join(__dirname, 'dist/index.html'));
     }
 
-    handleSyncApps(mainWindow);
+    const osInfo = getOSInfo();
 
-
-    const filePath = path.join(app.getPath('documents'), 'myfile.sync');
-    const data = 'hhhfdhskajfjksda jkdfkldsajfkl ';
-    if (filePath) {
-        console.log('filePath = ',filePath)
-        fs.writeFile(filePath, data, (err) => {
-            if (err) {
-                console.error(err);
-            } else {
-                console.log('export success ...')
-            }
-        });
-    } else {
-        event.sender.send('save-file-response', { success: false, error: 'Save dialog was canceled' });
-    }
+    (async () => {
+        try {
+            const appArray = await getInstallApps();
+            console.log('Installed apps:', appArray);
+            // 将结果传递给渲染进程
+            // 第2步：当网页内容加载完成时触发
+            mainWindow.webContents.on(CustomEvent.ELECTRON_EVENT.DID_FINISH_LOAD, () => {
+                console.log("send appArray to sub finished...", appArray);
+                mainWindow.webContents.send(CustomEvent.MAIN_TO_RENDER.INSTALLED_APPS, appArray);
+                mainWindow.webContents.send(CustomEvent.MAIN_TO_RENDER.OS_INFO, osInfo);
+            });
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    })();
 
     // exec(`osascript -e '${script}'`, (error, stdout, stderr) => {
     //     if (error) {
@@ -82,25 +85,14 @@ function createWindow() {
     console.log("start -----------------------------");
 }
 
-
 app.whenReady().then(() => {
     ipcMain.handle('ping', () => 'pong')
     createWindow()
 });
 
 
-// 打开网页中的 mac store
-// const url = 'https://apps.apple.com/us/app/app-name/id6451498949';
-// 打开系统的mac store
-// main listen on render
-ipcMain.on(CustomEvent.RENDER_TO_MAIN.OPEN_MAC_APP_STORE, (event, appId) => {
-    const url = `macappstore://itunes.apple.com/app/id${appId}`;
-    shell.openExternal(url);
-});
 
-ipcMain.on(CustomEvent.RENDER_TO_MAIN.EXPORT_ALL_APP_MES, (event, apps) => {
-    console.log('array = ', apps.length)
-});
+
 
 /**
  * 在 Windows 和 Linux 上，我们通常希望在关闭一个应用的所有窗口后让它退出。
@@ -122,31 +114,79 @@ app.on(CustomEvent.ELECTRON_EVENT.ACTIVATE, () => {
     }
 });
 
-function handleSyncApps(mainWindow) {
+/**
+ * 监听自定义channel
+ */
 
-    const osInfo = getOSInfo();
+// 打开网页中的 mac store
+// const url = 'https://apps.apple.com/us/app/app-name/id6451498949';
+// 打开系统的mac store
+// main listen on render
+ipcMain.on(CustomEvent.RENDER_TO_MAIN.OPEN_MAC_APP_STORE, (event, appId) => {
+    const url = `macappstore://itunes.apple.com/app/id${appId}`;
+    shell.openExternal(url);
+});
 
-    // 使用 mdfind 命令获取已安装的应用
-    // mdfind "kMDItemContentType == 'com.apple.application-bundle'" | grep "~/Library/Application Support"
-    exec('mdfind "kMDItemContentType == \'com.apple.application-bundle\'" | grep "/Applications" ', (error, stdout, stderr) => {
-            if (error) {
-                console.error(`exec error: ${error}`);
-                return;
+ipcMain.on(CustomEvent.RENDER_TO_MAIN.EXPORT_ALL_APP_MES, (event, apps) => {
+    console.log('array = ', apps.length)
+    const  osInfo = getOSInfo();
+    const filePath = path.join(app.getPath('documents'), 'app.sync');
+
+    let newlineC = '';
+    switch (osInfo) {
+        case 'MAC':
+            newlineC = `\n`;
+            break;
+        default:
+            newlineC = ` \r\n`;
+    }
+
+    let data = osInfo + newlineC;
+    (async () => {
+        try {
+            const appArray = await getInstallApps();
+            console.log('Installed apps:', appArray);
+
+            console.log('export all apps = ', appArray);
+            appArray.map(item => {
+                data = data + item.substring(item.lastIndexOf('/') + 1) + newlineC;
+            })
+            console.log('export data = ', data);
+            if (filePath) {
+                console.log('export filePath = ',filePath)
+                fs.writeFile(filePath, data, (err) => {
+                    if (err) {
+                        console.error(err);
+                    } else {
+                        console.log('export success ...')
+                    }
+                });
             } else {
-                console.log("installed-apps = ", stdout);
+                event.sender.send('save-file-response', { success: false, error: 'Save dialog was canceled' });
             }
-
-            const appArray = stdout.split('\n').filter(item => !item.includes(filePathSystem));
-            // 将结果传递给渲染进程
-            console.log(appArray);
-            // 第2步：当网页内容加载完成时触发
-            mainWindow.webContents.on(CustomEvent.ELECTRON_EVENT.DID_FINISH_LOAD, () => {
-                console.log("send appArray to sub finished...", appArray);
-                mainWindow.webContents.send(CustomEvent.MAIN_TO_RENDER.INSTALLED_APPS, appArray);
-                mainWindow.webContents.send(CustomEvent.MAIN_TO_RENDER.OS_INFO, osInfo);
-            });
+        } catch (error) {
+            console.error('Error:', error);
         }
-    );
+    })();
+
+});
+
+async function getInstallApps() {
+    try {
+        const startTime = Date.now();
+        // 使用 mdfind 命令获取已安装的应用
+        // mdfind "kMDItemContentType == 'com.apple.application-bundle'" | grep "~/Library/Application Support"
+        const { stdout, stderr } = await execAsync('mdfind "kMDItemContentType == \'com.apple.application-bundle\'" | grep "/Applications" ');
+        const endTime = Date.now();
+        console.log(`Execution time: ${endTime - startTime}ms`);
+
+        const appArray = stdout.split('\n').filter(item => item);
+        console.log(appArray);
+        return appArray;
+    } catch (error) {
+        console.error(`exec error: ${error}`);
+        return [];
+    }
 }
 
 function getOSInfo() {
@@ -156,8 +196,11 @@ function getOSInfo() {
       // OS Release: ${os.release()}
       // OS Hostname: ${os.hostname()}
     // `;
-
     console.log('osInfo = ', osInfo)
+    switch (osInfo){
+        case 'Darwin': return 'MAC';
+            break;
+    }
     return osInfo;
 }
 
