@@ -57,17 +57,18 @@ const App: React.FC = () => {
         console.log("detail111111 useEffect if in ", data.length);
         console.log("detail111111 useEffect if in ", data);
 
-        let appArray: Application[] = [];
-        data.map(item => {
-          let name: string = item.substring(item.lastIndexOf('/') + 1);
-          let appTemp: Application = {
-            name: name,
-            webUrl: "http://jkljlk",
-            localIsInstalled: true,
-          }
-          appArray.push(appTemp);
-        });
-        setApps(appArray);
+        // let appArray: Application[] = [];
+        // data.map(item => {
+        //   let name: string = item.substring(item.lastIndexOf('/') + 1);
+        //   let appTemp: Application = {
+        //     name: name,
+        //     webUrl: "http://jkljlk",
+        //     localIsInstalled: true,
+        //   }
+        //   appArray.push(appTemp);
+        // });
+        data
+        setApps(data.get('local'));
       });
 
       window.syncapps.onInstalledApps(CustomEvent.MAIN_TO_RENDER.OS_INFO, (data: string) => {

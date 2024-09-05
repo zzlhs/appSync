@@ -30,23 +30,26 @@ const MainView: React.FC<MainViewProps> = ({ apps, onInstallApp}) => {
 
 
     return(
-        <List
-            itemLayout="horizontal"
-            dataSource={apps}
-            renderItem={(item, index) => (
-                <List.Item actions={[
-                    item.localIsInstalled ?
-                        <Button type="primary" shape="round" disabled>  {t('main.installed')} </Button> :
-                        <Button type="primary" shape="round" onClick={() => handleInstall(item.webUrl)}>{t('main.uninstall')}</Button>
-                        ]}>
-                    <List.Item.Meta
-                        avatar={<Avatar src={`https://api.dicebear.com/7.x/miniavs/svg?seed=${index}`}/>}
-                        title={<a href="https://ant.design">{item.name}</a>}
-                        description={item.desc}
-                    />
-                </List.Item>
-            )}
-        />
+        <div>
+
+            <List
+                itemLayout="horizontal"
+                dataSource={apps}
+                renderItem={(item, index) => (
+                    <List.Item actions={[
+                        item.localIsInstalled ?
+                            <Button type="primary" shape="round" disabled>  {t('main.installed')} </Button> :
+                            <Button type="primary" shape="round" onClick={() => handleInstall(item.webUrl)}>{t('main.uninstall')}</Button>
+                            ]}>
+                        <List.Item.Meta
+                            avatar={<Avatar src={`https://api.dicebear.com/7.x/miniavs/svg?seed=${index}`}/>}
+                            title={<a href="https://ant.design">{item.name}</a>}
+                            description={item.desc}
+                        />
+                    </List.Item>
+                )}
+            />
+        </div>
     )
 
 }

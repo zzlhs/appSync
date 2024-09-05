@@ -12,7 +12,7 @@ const { exec } = require('child_process');
 const util = require('util');
 const execAsync = util.promisify(exec);
 const path = require('path');
-const fs = require('fs');
+const fs = require('fs').promises;
 const os = require('os');
 const CustomEvent = require('./custom-event');
 
@@ -57,12 +57,21 @@ function createWindow() {
     (async () => {
         try {
             const appArray = await getInstallApps();
-            console.log('Installed apps:', appArray);
+            const fileAppMap = await getFileApps();
+
+            appArray.forEach((app) => {
+                fileAppMap.get('local').push( {
+                    name: app.substring(app.lastIndexOf('/') + 1),
+                    localIsInstalled: true,
+                    webUrl: "http://jkljlk",
+                });
+            })
+
             // 将结果传递给渲染进程
             // 第2步：当网页内容加载完成时触发
             mainWindow.webContents.on(CustomEvent.ELECTRON_EVENT.DID_FINISH_LOAD, () => {
-                console.log("send appArray to sub finished...", appArray);
-                mainWindow.webContents.send(CustomEvent.MAIN_TO_RENDER.INSTALLED_APPS, appArray);
+                console.log("send appArray to sub finished...", fileAppMap);
+                mainWindow.webContents.send(CustomEvent.MAIN_TO_RENDER.INSTALLED_APPS, fileAppMap);
                 mainWindow.webContents.send(CustomEvent.MAIN_TO_RENDER.OS_INFO, osInfo);
             });
         } catch (error) {
@@ -127,19 +136,15 @@ ipcMain.on(CustomEvent.RENDER_TO_MAIN.OPEN_MAC_APP_STORE, (event, appId) => {
     shell.openExternal(url);
 });
 
+
+
 ipcMain.on(CustomEvent.RENDER_TO_MAIN.EXPORT_ALL_APP_MES, (event, apps) => {
     console.log('array = ', apps.length)
     const  osInfo = getOSInfo();
     const filePath = path.join(app.getPath('documents'), 'app.sync');
 
     let newlineC = '';
-    switch (osInfo) {
-        case 'MAC':
-            newlineC = `\n`;
-            break;
-        default:
-            newlineC = ` \r\n`;
-    }
+    newlineC = getNewLineFlag(osInfo);
 
     let data = osInfo + newlineC;
     (async () => {
@@ -149,7 +154,7 @@ ipcMain.on(CustomEvent.RENDER_TO_MAIN.EXPORT_ALL_APP_MES, (event, apps) => {
 
             console.log('export all apps = ', appArray);
             appArray.map(item => {
-                data = data + item.substring(item.lastIndexOf('/') + 1) + newlineC;
+                data = data + item.substring(item.lastIndexOf('/') + 1) + ' 1 ' + newlineC;
             })
             console.log('export data = ', data);
             if (filePath) {
@@ -171,6 +176,66 @@ ipcMain.on(CustomEvent.RENDER_TO_MAIN.EXPORT_ALL_APP_MES, (event, apps) => {
 
 });
 
+async function getFileApps() {
+    try {
+        const startTime = Date.now();
+        const  osInfo = getOSInfo();
+        const newlineC = getNewLineFlag(osInfo);
+        const allAppMap = new Map();
+
+        const filePath = path.join(app.getPath('documents'), 'app.sync');
+
+        try{
+            const data = await fs.readFile(filePath, 'utf8');
+            console.log('import file data = ', data)
+
+            const oss = ['MAC', 'WINDOWS'];
+            const regex = new RegExp(`\\s*(${oss.join('|')})\\s*`, 'g');
+            const osAppArray = data.split(regex);
+
+            oss.forEach(item => allAppMap.set(item, []));
+            allAppMap.set('local', []);
+            let key = '';
+            osAppArray.forEach(item => {
+                const tempItem = item.trim();
+                if (tempItem.length > 0) {
+                    if(!oss.includes(tempItem)){
+                        let ss = tempItem.split('\n');
+                        ss.forEach(item => {
+                            const appS = item.split('  ');
+                            const obj = {
+                                name:appS[0],
+                                cloudIsInstalled: appS[1] === '1' ? true : false,
+                                webUrl: appS[2], // none表示当前平台无此应用
+                            };
+                            allAppMap.get(key).push(obj);
+                        })
+                    }else{
+                        key = tempItem;
+                    }
+                }
+            });
+            console.log('import file allAppMap = ', allAppMap);
+        }catch(err){
+            console.error('Error reading file:', err);
+        }
+
+        // fs.readFile(filePath, 'utf8', (err, data) => {
+        //     if (err) {
+        //         console.error(`Error reading file: ${err.message}`);
+        //     } else {
+        //
+        //     }
+        // });
+        const endTime = Date.now();
+        console.log(`getFileApps Execution time: ${endTime - startTime}ms`);
+        return allAppMap;
+    } catch (error) {
+        console.error(`exec error: ${error}`);
+        return allAppMap;
+    }
+}
+
 async function getInstallApps() {
     try {
         const startTime = Date.now();
@@ -178,7 +243,7 @@ async function getInstallApps() {
         // mdfind "kMDItemContentType == 'com.apple.application-bundle'" | grep "~/Library/Application Support"
         const { stdout, stderr } = await execAsync('mdfind "kMDItemContentType == \'com.apple.application-bundle\'" | grep "/Applications" ');
         const endTime = Date.now();
-        console.log(`Execution time: ${endTime - startTime}ms`);
+        console.log(`getInstallApps Execution time: ${endTime - startTime}ms`);
 
         const appArray = stdout.split('\n').filter(item => item);
         console.log(appArray);
@@ -188,6 +253,8 @@ async function getInstallApps() {
         return [];
     }
 }
+
+
 
 function getOSInfo() {
     const osInfo = `${os.type()}`// `OS Type: ${os.type()}`
@@ -202,6 +269,16 @@ function getOSInfo() {
             break;
     }
     return osInfo;
+}
+
+function getNewLineFlag(osInfo) {
+    switch (osInfo) {
+        case 'MAC':
+            newlineC = `\n`;
+            break;
+        default:
+            return ` \r\n`;
+    }
 }
 
 
@@ -241,3 +318,5 @@ function readIconFile(iconPath) {
         // mainWindow.webContents.send('icon-data', dataUri);
     });
 }
+
+
