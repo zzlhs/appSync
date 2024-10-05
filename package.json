@@ -5,7 +5,8 @@
   "scripts": {
     "start213": "electron .",
     "startv": "vite",
-    "electron-start-dev": "NODE_ENV=development concurrently \"npm run startv\" \"wait-on --verbose http://localhost:5173 && electron .\"",
+    "electron-start-dev": "NODE_ENV=development NO_PROXY=localhost,127.0.0.1 concurrently \"npm run startv\" \"wait-on --verbose http://localhost:5173 && electron .\"",
+
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron-forge start",
     "build": "webpack",
@@ -52,6 +53,7 @@
     "webpack-dev-server": "^5.0.4"
   },
   "dependencies": {
+    "@ant-design/pro-components": "^2.7.15",
     "antd": "^5.17.4",
     "electron-squirrel-startup": "^1.0.1",
     "i18next": "^23.11.5",

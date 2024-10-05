@@ -15,6 +15,7 @@ const path = require('path');
 const fs = require('fs').promises;
 const os = require('os');
 const CustomEvent = require('./custom-event');
+const { constants } = require('buffer');
 
 const filePathSystem = "System";
 
@@ -60,13 +61,12 @@ function createWindow() {
             const fileAppMap = await getFileApps();
 
             appArray.forEach((app) => {
-                fileAppMap.get('local').push( {
+                fileAppMap.get('LOCAL').push( {
                     name: app.substring(app.lastIndexOf('/') + 1),
                     localIsInstalled: true,
                     webUrl: "http://jkljlk",
                 });
             })
-
             // 将结果传递给渲染进程
             // 第2步：当网页内容加载完成时触发
             mainWindow.webContents.on(CustomEvent.ELECTRON_EVENT.DID_FINISH_LOAD, () => {
@@ -146,16 +146,20 @@ ipcMain.on(CustomEvent.RENDER_TO_MAIN.EXPORT_ALL_APP_MES, (event, apps) => {
     let newlineC = '';
     newlineC = getNewLineFlag(osInfo);
 
+    // const dataArray = []
+    // dataArray.push(osInfo + newlineC)
     let data = osInfo + newlineC;
     (async () => {
         try {
             const appArray = await getInstallApps();
             console.log('Installed apps:', appArray);
-
             console.log('export all apps = ', appArray);
+
             appArray.map(item => {
-                data = data + item.substring(item.lastIndexOf('/') + 1) + ' 1 ' + newlineC;
+                data = data + item.substring(item.lastIndexOf('/') + 1, item.lastIndexOf('.app')) + '  1' + newlineC;
+                // dataArray.push(item.substring(item.lastIndexOf('/') + 1) + '  1  ' + newlineC)
             })
+            // let data = dataArray.join('')
             console.log('export data = ', data);
             if (filePath) {
                 console.log('export filePath = ',filePath)
@@ -194,7 +198,7 @@ async function getFileApps() {
             const osAppArray = data.split(regex);
 
             oss.forEach(item => allAppMap.set(item, []));
-            allAppMap.set('local', []);
+            allAppMap.set('LOCAL', []);
             let key = '';
             osAppArray.forEach(item => {
                 const tempItem = item.trim();
@@ -274,7 +278,7 @@ function getOSInfo() {
 function getNewLineFlag(osInfo) {
     switch (osInfo) {
         case 'MAC':
-            newlineC = `\n`;
+            return `\n`;
             break;
         default:
             return ` \r\n`;

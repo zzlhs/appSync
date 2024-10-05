@@ -43,6 +43,7 @@ const app2: Application  = {
 const appsD: Application[] = [app1, app2]
 
 const App: React.FC = () => {
+  const [allApps, setAllApps] = useState({});
   const [apps, setApps] = useState<Application[]>([]);
   const [osInfo, setOsInfo] = useState('');
   const [willInstallAppUrl, setwillInstallAppUrl] = useState<string>('');
@@ -67,8 +68,8 @@ const App: React.FC = () => {
         //   }
         //   appArray.push(appTemp);
         // });
-        data
-        setApps(data.get('local'));
+        setAllApps(data);
+        setApps(data.get('LOCAL'));
       });
 
       window.syncapps.onInstalledApps(CustomEvent.MAIN_TO_RENDER.OS_INFO, (data: string) => {
@@ -90,6 +91,11 @@ const App: React.FC = () => {
     window.syncapps.openMacAppStore(url);
   }
 
+  const handleAppOsFromChild = (osType: string) => {
+    console.log('handleAppOsFromChild ', osType);
+    setApps(allApps.get(osType));
+  }
+
   const handleExportAllApp = (apps: Application[]) => {
     window.syncapps.exportAllAppMes(apps);
   }
@@ -100,8 +106,11 @@ const App: React.FC = () => {
         <Route index element={<Login />} />
         <Route path="home" element={<Home />}>
           <Route index path="index" element={<h1>欢迎使用应用同步</h1>} />
-          <Route index path="main" element={<MainView apps={apps} onInstallApp = {handleInstall}  />} />
-          <Route index path="my" element={<MyView osInfo={osInfo} onExportAllAppMes={handleExportAllApp} />} />
+          <Route index path="main" element={<MainView apps={apps}
+                                                      onInstallApp = {handleInstall}
+                                                      onChangeOsType={handleAppOsFromChild} />}
+          />
+          <Route index path="my" element={<MyView osInfo={osInfo} onExportAllAppMes={handleExportAllApp}/>} />
         </Route>
       </Routes>
     </BrowserRouter>

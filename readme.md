@@ -7,6 +7,17 @@ nvm use 18.17.0
 
 npm run electron-start-dev
 
+
+"electron-start-dev": "NODE_ENV=development concurrently \"npm run startv\" \"wait-on --verbose http://localhost:5173 && electron .\"",
+
+
+```
+## 常用命令
+```angular2html
+
+"electron-start-dev": "NODE_ENV=development concurrently \"npm run startv\" \"wait-on --verbose http://localhost:5173 && electron .\"",
+
+
 ```
 
 ### 1 项目结构
