@@ -132,7 +132,14 @@ app.on(CustomEvent.ELECTRON_EVENT.ACTIVATE, () => {
 // 打开系统的mac store
 // main listen on render
 ipcMain.on(CustomEvent.RENDER_TO_MAIN.OPEN_MAC_APP_STORE, (event, appId) => {
-    const url = `macappstore://itunes.apple.com/app/id${appId}`;
+    /**
+     * 添加打开windows store的方法
+     */
+    let url = '';
+    switch(process.platform){
+        case 'win32':  url = `ms-windows-store://pdp/?ProductId=${appId}`; break
+        case 'darwin': url = `macappstore://itunes.apple.com/app/id${appId}`;break
+    }
     shell.openExternal(url);
 });
 
@@ -141,6 +148,7 @@ ipcMain.on(CustomEvent.RENDER_TO_MAIN.OPEN_MAC_APP_STORE, (event, appId) => {
 ipcMain.on(CustomEvent.RENDER_TO_MAIN.EXPORT_ALL_APP_MES, (event, apps) => {
     console.log('array = ', apps.length)
     const  osInfo = getOSInfo();
+    // todo
     const filePath = path.join(app.getPath('documents'), 'app.sync');
 
     let newlineC = '';
@@ -186,7 +194,7 @@ async function getFileApps() {
         const  osInfo = getOSInfo();
         const newlineC = getNewLineFlag(osInfo);
         const allAppMap = new Map();
-
+        // todo
         const filePath = path.join(app.getPath('documents'), 'app.sync');
 
         try{
@@ -240,7 +248,33 @@ async function getFileApps() {
     }
 }
 
+ 
 async function getInstallApps() {
+    /**
+     *  获取windows应用列表
+     */
+    if (os.platform() === 'win32') {
+        try {
+            const startTime = Date.now();
+            // 使用 PowerShell 命令获取已安装的应用
+            const { stdout, stderr } = await execAsync('powershell -Command "Get-WmiObject -Class Win32_Product | Select-Object -Property Name, InstallLocation | ConvertTo-Json"');
+            const endTime = Date.now();
+            console.log(`获取Windows应用列表执行时间: ${endTime - startTime}毫秒`);
+
+            const apps = JSON.parse(stdout);
+            // InstallLocation
+            const appArray = apps.map(app => app.Name).filter(Boolean);
+            console.log(appArray);
+            return appArray;
+        } catch (error) {
+            console.error(`执行错误: ${error}`);
+            return [];
+        }
+    }
+
+    /**
+     * 获取mac的应用列表
+     */
     try {
         const startTime = Date.now();
         // 使用 mdfind 命令获取已安装的应用
@@ -256,9 +290,8 @@ async function getInstallApps() {
         console.error(`exec error: ${error}`);
         return [];
     }
+    
 }
-
-
 
 function getOSInfo() {
     const osInfo = `${os.type()}`// `OS Type: ${os.type()}`
