@@ -97,7 +97,7 @@ const App: React.FC = () => {
   }
 
   const handleExportAllApp = (apps: Application[]) => {
-    window.syncapps.exportAllAppMes(apps);
+    window.syncapps.exportAllAppMes(allApps);
   }
 
   return (

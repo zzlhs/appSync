@@ -63,8 +63,7 @@ function createWindow() {
             appArray.forEach((app) => {
                 fileAppMap.get('LOCAL').push( {
                     name: app.substring(app.lastIndexOf('/') + 1),
-                    localIsInstalled: true,
-                    webUrl: "http://jkljlk",
+                    localIsInstalled: true
                 });
             })
             // 将结果传递给渲染进程
@@ -154,20 +153,42 @@ ipcMain.on(CustomEvent.RENDER_TO_MAIN.EXPORT_ALL_APP_MES, (event, apps) => {
     let newlineC = '';
     newlineC = getNewLineFlag(osInfo);
 
-    // const dataArray = []
-    // dataArray.push(osInfo + newlineC)
-    let data = osInfo + newlineC;
+    let data= '';
     (async () => {
         try {
             const appArray = await getInstallApps();
+            const fileAppMap = await getFileApps();
             console.log('Installed apps:', appArray);
-            console.log('export all apps = ', appArray);
+            console.log('file fileAppMap = ', fileAppMap);
 
-            appArray.map(item => {
-                data = data + item.substring(item.lastIndexOf('/') + 1, item.lastIndexOf('.app')) + '  1' + newlineC;
-                // dataArray.push(item.substring(item.lastIndexOf('/') + 1) + '  1  ' + newlineC)
-            })
-            // let data = dataArray.join('')
+            // 将新获取的应用添加到当前操作系统的列表中
+            if (!fileAppMap.has(osInfo)) {
+                fileAppMap.set(osInfo, []);
+            }
+            fileAppMap.get(osInfo).push(...appArray);
+            
+            // 遍历 fileAppMap
+            for (const [os, apps] of fileAppMap) {
+                if (!os.includes('LOCAL')) {  // 如果操作系统标识不包含 'LOCAL'
+                    data += `${os}${newlineC}`;  // 添加操作系统标识
+                    apps.forEach(app => {
+                        let appName;
+                        if (typeof app === 'string') {
+                            // 对于字符串类型的项（可能是文件路径）
+                            appName = app.includes('/') 
+                                ? app.substring(app.lastIndexOf('/') + 1).replace('.app', '')
+                                : app.replace('.app', '');
+                        } else if (typeof app === 'object' && app.name) {
+                            // 对于对象类型的项（可能包含 name 属性）
+                            appName = app.name;
+                        }
+                        if (appName) {
+                            data += `${appName}  1${newlineC}`;
+                        }
+                    });
+                }
+            }
+
             console.log('export data = ', data);
             if (filePath) {
                 console.log('export filePath = ',filePath)

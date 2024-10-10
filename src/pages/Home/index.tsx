@@ -32,7 +32,7 @@ const App: React.FC = () => {
               className="demo-logo-vertical flex flex-row my-4 box-border justify-center w-4/5 mx-auto"
               onClick={() => navigate("/home")}
           >
-              <img src={logo} className="w-7 h-7"/>
+              <img src={logo} className="w-8 h-8 rounded-2xl"/>
               {isShowTitle && (
                   <p
                       className="h-7 text-center pl-4"
